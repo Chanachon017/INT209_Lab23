@@ -1,28 +1,23 @@
-name: CI with Docker Compose
+name: CI COMPOSE Pipeline
  
 on:
-push:
-   branches:
-     - main
-pull_request:
+  push:
+    branches:
+      - main
+  pull_request:
  
 jobs:
-docker-ci:
-   runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
  
-   steps:
-     - name: Checkout code
-       uses: actions/checkout@v3
+      - name: Simulate Build
+        run: docker compose up -d && sleep 20
  
-     - name: Set up Docker Compose
-       run: |
-         docker compose up -d
-         echo "⏳ Waiting for containers to initialize..."
-         sleep 20
+      - name: Run Web
+        run: docker compose exec -it web curl http://localhost:5000/api/users
  
-     - name: Run test inside web container
-       run: docker compose exec -it web curl http://localhost:5000/api/users
- 
-     - name: Shutdown Docker Compose
-       if: always()
-       run: docker compose down
+      - name: Down Compose
+        run: docker compose down
